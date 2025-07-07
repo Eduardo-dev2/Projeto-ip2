@@ -33,3 +33,6 @@ def configuracoes_usuario(litros_str, intervalo_str, inicio_str, final_str):
 
    
     return litros, intervalo, horario_ini, horario_fin
+
+
+
