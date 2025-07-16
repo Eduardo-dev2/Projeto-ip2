@@ -20,9 +20,9 @@ janela=ctk.CTk()
 janela.title("Monitorador De Hidratação")
 janela.geometry("1024x680")
 
-fundo=Image.open("fundo1.png")
-fundo2=Image.open("fundo2.png")
-alfredo_img=Image.open("alfredo.png")
+fundo=Image.open("assets/fundo1.png")
+fundo2=Image.open("assets/fundo2.png")
+alfredo_img=Image.open("assets/alfredo.png")
 
 
 img_ctk = CTkImage(light_image=fundo, dark_image=fundo, size=(1024, 800))
@@ -135,4 +135,3 @@ button.place(relx=0.67, rely=0.5, anchor="center")
 
 
 janela.mainloop()
-
