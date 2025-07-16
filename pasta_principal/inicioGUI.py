@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from config import configuracoes_usuario
+from config import configuracoes_usuario, calcular_lembretes, mostrar_notificacao, esperando, dados_usuario, iniciar_lembretes
 from PIL import Image
 from customtkinter import CTkImage, CTkLabel
 
@@ -66,7 +66,7 @@ def button_acao():
     button2.place(relx=0.52,rely=0.45, anchor="center")
 
 def button2_acao():
-    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3, titulo2
+    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2
 
     usuario=nome.get()
     nome.place_forget()
@@ -92,7 +92,7 @@ def button2_acao():
 
 
 def button3_acao():
-    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro
+    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2
 
     if erro:
         erro.destroy()
@@ -118,6 +118,20 @@ def button3_acao():
         print('fim',fim)
         
 
+    calculo=calcular_lembretes(l,i,ini,fim)
+        
+    qtd_lembretes, qtd_por_lembrete = calculo
+
+    print(qtd_lembretes)
+    print(qtd_por_lembrete)
+
+    intervalo_int=int(intervalo.get())
+    dados_usuario(usuario, qtd_por_lembrete)
+
+    def iniciar_agora():
+        iniciar_lembretes(qtd_lembretes, intervalo_int, janela)
+
+    esperando(ini, iniciar_agora, janela)
 
 
 
