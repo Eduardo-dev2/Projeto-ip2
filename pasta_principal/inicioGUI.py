@@ -22,12 +22,12 @@ janela.geometry("1024x680")
 
 fundo=Image.open("assets/fundo1.png")
 fundo2=Image.open("assets/fundo2.png")
-alfredo_img=Image.open("assets/alfredo.png")
+
 
 
 img_ctk = CTkImage(light_image=fundo, dark_image=fundo, size=(1024, 800))
 img_ctk2 = CTkImage(light_image=fundo2, dark_image=fundo2, size=(1024, 800))
-alfredo_ctk=CTkImage(light_image=fundo2, dark_image=fundo2, size=(500, 500))
+
 
 
 fundo_label = CTkLabel(janela, image=img_ctk, text="")
@@ -53,8 +53,7 @@ def button_acao():
     titulo2=ctk.CTkLabel(janela, text="olá, eu me chamo alfredo, vou ser seu assistente para lhe lembrar de beber água",font=ctk.CTkFont(size=20, weight="bold"), fg_color='#f3f3f3')
     titulo2.place(relx=0.52, rely=0.1, anchor="center")
    
-    alfredo = ctk.CTkLabel(janela, image=alfredo_ctk, text="") 
-    alfredo.place(relx=0.2, rely=0.5, anchor="center") 
+    
 
 
     nome=ctk.CTkEntry(janela,placeholder_text="Como devo te chamar? :)", width=400, height=120, fg_color='white', corner_radius=15)
