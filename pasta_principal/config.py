@@ -15,34 +15,36 @@ def configuracoes_usuario(litros_str, intervalo_str, inicio_str, final_str):
         litros = float(litros_str)
         if litros <= 0:
             return "Erro: litros deve ser maior que zero."
-    except:
+    except ValueError:
         return "Erro: litros inválido, digite um número."
-
 
     try:
         intervalo = int(intervalo_str)
-        if intervalo < 10:
-            return "Erro: intervalo mínimo é 10 minutos."
-    except:
+       # if intervalo < 10:
+     #       return "Erro: intervalo mínimo é 10 minutos."
+    except ValueError:
         return "Erro: intervalo inválido, digite um número inteiro."
 
+    hoje = datetime.now()
 
     try:
-        horario_ini = datetime.strptime(inicio_str, "%H:%M")
-    except:
+        horario_ini = datetime.strptime(inicio_str, "%H:%M").replace(
+            year=hoje.year, month=hoje.month, day=hoje.day
+        )
+    except ValueError:
         return "Erro: formato horário início inválido, use HH:MM."
 
-   
     try:
-        horario_fin = datetime.strptime(final_str, "%H:%M")
+        horario_fin = datetime.strptime(final_str, "%H:%M").replace(
+            year=hoje.year, month=hoje.month, day=hoje.day
+        )
+        
         if horario_fin <= horario_ini:
             horario_fin += timedelta(days=1)
-    except:
+    except ValueError:
         return "Erro: formato horário final inválido, use HH:MM."
-
    
     return litros, intervalo, horario_ini, horario_fin
-
 
 
 
@@ -75,9 +77,12 @@ def mostrar_notificacao(titulo, mensagem):
 
 def esperando(hr_ini,ini_apos,janela):
     agora=datetime.now()
+    print(f"Verificando hora: Agora={agora.strftime('%H:%M:%S')}, Início={hr_ini.strftime('%H:%M:%S')}")
     if agora>=hr_ini:
+        print("Horário de início alcançado, iniciando lembretes...")
         ini_apos()
     else:
+        print("Aguardando horário de início...")
         janela.after(1000, lambda: esperando(hr_ini,ini_apos,janela))
 
 
@@ -89,14 +94,18 @@ def dados_usuario(usuario, qtd_por_lembrete):
 
 
 
-def iniciar_lembretes(lembretes_total,intervalo_min,janela):
-    from config import _usuario, _qtd_por_lembrete
+def iniciar_lembretes(lembretes_total, intervalo_min, janela):
 
     def ciclo(lembretes_restantes):
-        if lembretes_restantes==0:
+        if lembretes_restantes == 0:
+            print("Ciclo de lembretes concluído.") 
             return
+        
+        print(f"Enviando notificação: Restam {lembretes_restantes} lembretes. Hora: {datetime.now().strftime('%H:%M:%S')}")
         mostrar_notificacao("Hora de beber Água", f"olá {_usuario} beba {_qtd_por_lembrete}ml")
-        janela.after((intervalo_min*60000), lambda:ciclo(lembretes_restantes-1))
+        
+        proximo_agendamento_em_ms = intervalo_min * 60 * 1000
+        print(f"Próximo lembrete agendado para daqui a {intervalo_min} minutos.") 
+        janela.after(proximo_agendamento_em_ms, lambda: ciclo(lembretes_restantes - 1))
 
     ciclo(lembretes_total)
-
