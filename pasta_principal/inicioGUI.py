@@ -22,12 +22,12 @@ janela.geometry("1024x680")
 
 fundo=Image.open("assets/fundo1.png")
 fundo2=Image.open("assets/fundo2.png")
-
+fundo3=Image.open("assets/fundo3.png")
 
 
 img_ctk = CTkImage(light_image=fundo, dark_image=fundo, size=(1024, 800))
 img_ctk2 = CTkImage(light_image=fundo2, dark_image=fundo2, size=(1024, 800))
-
+img_ctk3= CTkImage(light_image=fundo3, dark_image=fundo3, size=(1024, 800))
 
 
 fundo_label = CTkLabel(janela, image=img_ctk, text="")
@@ -65,7 +65,7 @@ def button_acao():
     button2.place(relx=0.52,rely=0.45, anchor="center")
 
 def button2_acao():
-    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2
+    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2,texto
 
     usuario=nome.get()
     nome.place_forget()
@@ -91,7 +91,7 @@ def button2_acao():
 
 
 def button3_acao():
-    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2
+    global nome, button2, litros, intervalo, horario_ini, horario_fin, button3,erro,qtd_lembretes, qtd_por_lembrete,usuario,titulo2,texto
 
     if erro:
         erro.destroy()
@@ -133,8 +133,13 @@ def button3_acao():
     esperando(ini, iniciar_agora, janela)
 
 
-
-
+    litros.place_forget()
+    intervalo.place_forget()
+    horario_ini.place_forget()
+    horario_fin.place_forget()
+    button3.place_forget()
+    texto.place_forget()
+    fundo_label.configure(image=img_ctk3)
 
 button=ctk.CTkButton(janela, text="Clique para começar",font=ctk.CTkFont(family="Arial", size=18, weight="bold"), 
                      width=200, height=100, command=button_acao, fg_color='#4682B4',corner_radius=50)
