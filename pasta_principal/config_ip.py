@@ -4,9 +4,7 @@ import time
 
 _usuario = None
 _qtd_por_lembrete = None
-
-
-
+senha_usu=None
 
 
 def configuracoes_usuario(litros_str, intervalo_str, inicio_str, final_str):
@@ -109,3 +107,25 @@ def iniciar_lembretes(lembretes_total, intervalo_min, janela):
         janela.after(proximo_agendamento_em_ms, lambda: ciclo(lembretes_restantes - 1))
 
     ciclo(lembretes_total)
+
+
+def salvar_credenciais(usuario,senha):
+    with open("credenciais.txt", "a") as arquivo:
+        arquivo.write(f"Usuario: {usuario}\n")
+        arquivo.write(f"Senha: {senha}\n")
+        arquivo.write("---\n") # Separador para futuras entradas
+    print("Credenciais salvas com sucesso!")
+
+def credenciais_validas(usuario, senha):
+    try:
+        with open("credenciais.txt", "r") as arquivo:
+            linhas = arquivo.readlines()
+            for i in range(0, len(linhas), 3):  # cada registo tem 3 linhas
+                usuario_salvo = linhas[i].strip().replace("Usuario: ", "")
+                senha_salva = linhas[i + 1].strip().replace("Senha: ", "")
+                if usuario == usuario_salvo and senha == senha_salva:
+                    return True
+        return False
+    except FileNotFoundError:
+        print("Arquivo 'credenciais.txt' não encontrado.")
+        return False
