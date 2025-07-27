@@ -4,14 +4,14 @@ from PIL import Image
 from customtkinter import CTkImage, CTkLabel, CTkScrollableFrame
 from datetime import datetime, timedelta
 
-# Variáveis globais
+
 nome = senha = titulo2 = button2 = erro_login = None
 nome2 = senha2 = button_log2 = erro = None
 litros = intervalo = horario_ini = horario_fin = button3 = texto = None
 usuario = senha_usu = qtd_lembretes = qtd_por_lembrete = None
 meta_diaria_ml = 0
 
-# --- Novas variáveis para as figurinhas e ranking ---
+
 figurinha_desbloqueada_label = None
 colecao_figurinhas = []
 todas_figurinhas = [
@@ -29,37 +29,28 @@ dias_consecutivos = 0
 copo_canvas = None
 progresso_texto = None
 
-# Arquivos de dados (usando .txt)
+
 ARQUIVO_DADOS_USUARIO = "text/dados_usuario.txt"
 ARQUIVO_RANKING = "text/ranking.txt"
 
-# Configuração inicial da janela
+
 ctk.set_default_color_theme("blue")
 janela = ctk.CTk()
 janela.title("Monitorador De Hidratação")
 janela.geometry("1024x800")
 
-# Fundos
-try:
-    fundo = Image.open("assets/tela_loguin.png")
-    fundo2 = Image.open("assets/fundo2.png")
-    fundo3 = Image.open("assets/fundo3.png")
-except FileNotFoundError:
-    print("Erro: Arquivos de fundo não encontrados. Usando placeholders.")
-    fundo = Image.new('RGB', (1024, 800), color = 'lightgray')
-    fundo2 = Image.new('RGB', (1024, 800), color = 'gray')
-    fundo3 = Image.new('RGB', (1024, 800), color = 'darkgray')
-except Exception as e:
-    print(f"Erro ao carregar imagem de fundo: {e}. Usando placeholders.")
-    fundo = Image.new('RGB', (1024, 800), color = 'lightgray')
-    fundo2 = Image.new('RGB', (1024, 800), color = 'gray')
-    fundo3 = Image.new('RGB', (1024, 800), color = 'darkgray')
+
+fundo = Image.open("assets/tela_loguin.png")
+fundo2 = Image.open("assets/fundo2.png")
+fundo3 = Image.open("assets/fundo3.png")
+
 
 
 img_ctk_fundo = CTkImage(light_image=fundo, dark_image=fundo, size=(1024, 800))
 img_ctk = CTkImage(light_image=fundo, dark_image=fundo, size=(1024, 800))
 img_ctk2 = CTkImage(light_image=fundo2, dark_image=fundo2, size=(1024, 800))
 img_ctk3 = CTkImage(light_image=fundo3, dark_image=fundo3, size=(1024, 800))
+img_erro = CTkImage(Image.open("assets/erro_login.png"), size=(800, 600))
 
 fundo_label = CTkLabel(janela, image=img_ctk, text="")
 fundo_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -368,7 +359,7 @@ def login():
     senha2.configure(font=ctk.CTkFont(size=30))
     senha2.place(relx=0.52, rely=0.40, anchor="center")
 
-    button_log2 = ctk.CTkButton(janela, text="Loguin", font=ctk.CTkFont(family="Arial", size=18, weight="bold"),
+    button_log2 = ctk.CTkButton(janela, text="Login", font=ctk.CTkFont(family="Arial", size=18, weight="bold"),
                                 width=115, height=70, command=validacao, fg_color='#4682B4', corner_radius=50)
     button_log2.place(relx=0.52, rely=0.70, anchor="center")
 
@@ -399,6 +390,10 @@ def tela_configuracoes():
     button3.place(relx=0.5, rely=0.70, anchor="center")
 
 
+
+
+
+
 def validacao():
     global erro_login, usuario
 
@@ -414,7 +409,7 @@ def validacao():
         if erro_login:
             erro_login.destroy()
             erro_login = None
-
+        
         usuario = usuario_digitado
         
         carregar_dados_usuario() 
@@ -430,6 +425,10 @@ def validacao():
         erro_login = ctk.CTkLabel(janela, text="Usuário ou senha incorretos", text_color="red",
                                   font=ctk.CTkFont(size=15, weight="bold"), fg_color='#f3f3f3')
         erro_login.place(relx=0.52, rely=0.60, anchor="center")
+
+        imagem_erro = CTkLabel(janela, image=img_erro, text="")
+        imagem_erro.place(relx=0.50, rely=0.55, anchor="center")
+        janela.after(1500, imagem_erro.destroy)
 
 
 def tela_principal():
@@ -483,7 +482,7 @@ def tela_principal():
         atualizar_copo()
         salvar_dados_usuario()
 
-    botao_beber = ctk.CTkButton(janela, text=f'beber {qtd_por_lembrete} ml', command=beber_agua, width=150, height=50)
+    botao_beber = ctk.CTkButton(janela, text=f'beber {qtd_por_lembrete*1000} ml', command=beber_agua, width=150, height=50)
     botao_beber.place(relx=0.5, rely=0.9, anchor="center")
 
     progresso_texto = ctk.CTkLabel(janela, text=f"{copo_canvas.progresso:.0f} ml / {meta_diaria_ml} ml", font=ctk.CTkFont(size=16))

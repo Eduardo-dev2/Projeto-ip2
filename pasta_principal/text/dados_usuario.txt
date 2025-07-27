@@ -1,2 +1,1 @@
-edu;assets/figurinha1.png,assets/figurinha2.png;2;2025-07-29;6000;6000
-lula;assets/figurinha1.png;1;2025-07-29;6000;6000
+edu;;0;2025-07-27;5000.0;5000

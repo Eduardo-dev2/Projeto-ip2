@@ -100,7 +100,7 @@ def iniciar_lembretes(lembretes_total, intervalo_min, janela):
             return
         
         print(f"Enviando notificação: Restam {lembretes_restantes} lembretes. Hora: {datetime.now().strftime('%H:%M:%S')}")
-        mostrar_notificacao("Hora de beber Água", f"olá {_usuario} beba {_qtd_por_lembrete}ml")
+        mostrar_notificacao("Hora de beber Água", f"olá {_usuario} beba {_qtd_por_lembrete*1000}ml")
         
         proximo_agendamento_em_ms = intervalo_min * 60 * 1000
         print(f"Próximo lembrete agendado para daqui a {intervalo_min} minutos.") 
