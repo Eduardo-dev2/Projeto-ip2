@@ -110,7 +110,7 @@ def iniciar_lembretes(lembretes_total, intervalo_min, janela):
 
 
 def salvar_credenciais(usuario,senha):
-    with open("credenciais.txt", "a") as arquivo:
+    with open("text/credenciais.txt", "a") as arquivo:
         arquivo.write(f"Usuario: {usuario}\n")
         arquivo.write(f"Senha: {senha}\n")
         arquivo.write("---\n") # Separador para futuras entradas
@@ -118,7 +118,7 @@ def salvar_credenciais(usuario,senha):
 
 def credenciais_validas(usuario, senha):
     try:
-        with open("credenciais.txt", "r") as arquivo:
+        with open("text/credenciais.txt", "r") as arquivo:
             linhas = arquivo.readlines()
             for i in range(0, len(linhas), 3):  # cada registo tem 3 linhas
                 usuario_salvo = linhas[i].strip().replace("Usuario: ", "")

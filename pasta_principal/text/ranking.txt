@@ -1,0 +1,2 @@
+ultima_reset_semana:2025-07-28
+edu;1
