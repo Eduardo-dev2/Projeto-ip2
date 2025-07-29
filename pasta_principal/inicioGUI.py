@@ -57,6 +57,8 @@ fundo_label.place(x=0, y=0, relwidth=1, relheight=1)
 
 # --- Funções de Salvar/Carregar Dados ---
 
+
+#carrega os dados do usuario
 def carregar_dados_usuario():
     global colecao_figurinhas, dias_consecutivos, meta_diaria_ml
 
@@ -65,56 +67,49 @@ def carregar_dados_usuario():
     progresso_do_dia_carregado = 0.0
     meta_diaria_ml_carregada = 0
     
-    try:
-        with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
-            for line in f:
-                parts = line.strip().split(';')
-                if len(parts) >= 6 and parts[0] == usuario:
-                    colecao_figurinhas.extend(parts[1].split(',') if parts[1] else [])
-                    dias_consecutivos = int(parts[2])
-                    progresso_do_dia_carregado = float(parts[4])
-                    meta_diaria_ml_carregada = int(float(parts[5]))
-                    break
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        print(f"Erro ao carregar dados do usuário do TXT: {e}")
+#abre o arquivo e percorre cada linha para encontrar os dados solicitados
+    with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
+        for line in f:
+            parts = line.strip().split(';')
+            if len(parts) >= 6 and parts[0] == usuario:
+                colecao_figurinhas.extend(parts[1].split(',') if parts[1] else [])
+                dias_consecutivos = int(parts[2])
+                progresso_do_dia_carregado = float(parts[4])
+                meta_diaria_ml_carregada = int(float(parts[5]))
+                break
 
     meta_diaria_ml = meta_diaria_ml_carregada
 
-def salvar_dados_usuario():
-    all_users_data = {}
-    try:
-        with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
-            for line in f:
-                parts = line.strip().split(';')
-                if len(parts) >= 6:
-                    all_users_data[parts[0]] = {
-                        "figurinhas": parts[1],
-                        "dias_consecutivos": parts[2],
-                        "ultimo_uso": parts[3],
-                        "progresso_dia": parts[4],
-                        "meta_diaria_ml": parts[5]
-                    }
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        print(f"Erro ao ler dados existentes do TXT antes de salvar: {e}")
 
+#salvar os dados do usuario
+def salvar_dados_usuario():
+    all_users_data = {} #salvar dados de todos os usuarios
+    with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
+        for line in f:
+            parts = line.strip().split(';')
+            if len(parts) >= 6:
+                all_users_data[parts[0]] = { #guarda os dados em um dicionario
+                    "figurinhas": parts[1],
+                    "dias_consecutivos": parts[2],
+                    "ultimo_uso": parts[3],
+                    "progresso_dia": parts[4],
+                    "meta_diaria_ml": parts[5]
+                }
+    
     figurinhas_str = ','.join(colecao_figurinhas)
     ultimo_uso_str = datetime.now().strftime("%Y-%m-%d")
 
     current_progresso = copo_canvas.progresso if copo_canvas and hasattr(copo_canvas, 'progresso') else 0.0
     current_meta_ml = meta_diaria_ml if meta_diaria_ml else 0
 
-    all_users_data[usuario] = {
+    all_users_data[usuario] = { #atualiza os dados do usuario atual
         "figurinhas": figurinhas_str,
         "dias_consecutivos": str(dias_consecutivos),
         "ultimo_uso": ultimo_uso_str,
         "progresso_dia": str(current_progresso),
         "meta_diaria_ml": str(current_meta_ml)
     }
-
+#sobrescreve esses dados no arquivo
     with open(ARQUIVO_DADOS_USUARIO, 'w') as f:
         for user_key, data in all_users_data.items():
             line_to_write = f"{user_key};{data['figurinhas']};{data['dias_consecutivos']};{data['ultimo_uso']};{data['progresso_dia']};{data['meta_diaria_ml']}\n"
@@ -123,23 +118,17 @@ def salvar_dados_usuario():
 
 def carregar_ranking():
     global ranking_semanal
-    ranking_semanal = {}
-    try:
-        with open(ARQUIVO_RANKING, 'r') as f:
-            lines = f.readlines()
-            if lines:
-                if "ultima_reset_semana:" in lines[0]:
-                    last_reset_line = lines.pop(0)
-                    ranking_semanal["ultima_reset_semana"] = last_reset_line.split(":")[1].strip()
-                for line in lines:
-                    parts = line.strip().split(';')
-                    if len(parts) == 2:
-                        ranking_semanal[parts[0]] = int(parts[1])
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        print(f"Erro ao carregar ranking do TXT: {e}")
-
+    ranking_semanal = {} #armazena a pontuação de cada usuario
+    with open(ARQUIVO_RANKING, 'r') as f: #lê o arquivo para a pontuação e reset semanal de cada usuario
+        lines = f.readlines()
+        if lines:
+            if "ultima_reset_semana:" in lines[0]:
+                last_reset_line = lines.pop(0)
+                ranking_semanal["ultima_reset_semana"] = last_reset_line.split(":")[1].strip()
+            for line in lines:
+                parts = line.strip().split(';')
+                if len(parts) == 2:
+                    ranking_semanal[parts[0]] = int(parts[1])
 
 def salvar_ranking():
     with open(ARQUIVO_RANKING, 'w') as f:
@@ -153,7 +142,7 @@ def salvar_ranking():
             line_to_write = f"{user};{days}\n"
             f.write(line_to_write)
 
-
+#toda vez que começa uma nova semana reseta
 def resetar_semana_ranking():
     global ranking_semanal
     hoje = datetime.now()
@@ -167,23 +156,26 @@ def resetar_semana_ranking():
         salvar_ranking()
 
 
-def verificar_e_desbloquear_premio():
+def verificar_e_desbloquear_premio(): #adiciona nova figurinha na coleção mostra uma notificação, atualiza o ranking semanal e salva nos arquivos
     global colecao_figurinhas, dias_consecutivos, figurinha_desbloqueada_label
 
-    if len(colecao_figurinhas) >= len(todas_figurinhas):
+    if len(colecao_figurinhas) >= len(todas_figurinhas):#se todas as figurinhas estiverem desbloqueadas
         return
 
+
+#seleciona qual figurinha será desbloqueada baseada no dia 
     if dias_consecutivos > 0 and dias_consecutivos <= len(todas_figurinhas):
         figurinha_nova_path = todas_figurinhas[dias_consecutivos - 1]
         if figurinha_nova_path not in colecao_figurinhas:
-            colecao_figurinhas.append(figurinha_nova_path)
-            salvar_dados_usuario()
+            colecao_figurinhas.append(figurinha_nova_path)#adiciona a nova figurinha a coleção
+            salvar_dados_usuario()#salva no arquivo
             mostrar_notificacao("Parabéns!", f"Você desbloqueou uma nova figurinha!")
 
             try:
                 if figurinha_desbloqueada_label:
                     figurinha_desbloqueada_label.destroy()
                 
+                #abre e mostra a figurinha na tela
                 img_figurinha = Image.open(figurinha_nova_path)
                 img_ctk_figurinha = CTkImage(light_image=img_figurinha, dark_image=img_figurinha, size=(150, 150))
                 
@@ -202,6 +194,8 @@ def verificar_e_desbloquear_premio():
     salvar_ranking()
 
 
+
+#verifica se usuario usou app se bateu a meta carrega a coleção de figurinhas e atualiza o progresso do copo
 def inicializar_estado_diario():
     global copo_canvas, meta_diaria_ml, dias_consecutivos
 
@@ -209,23 +203,20 @@ def inicializar_estado_diario():
     meta_salva_do_usuario = 0
     ultimo_uso_str = None
     
-    try:
-        with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
-            for line in f:
-                parts = line.strip().split(';')
-                if len(parts) >= 6 and parts[0] == usuario:
-                    colecao_figurinhas.clear()
-                    colecao_figurinhas.extend(parts[1].split(',') if parts[1] else [])
-                    dias_consecutivos = int(parts[2])
-                    ultimo_uso_str = parts[3]
-                    progresso_do_dia_carregado = float(parts[4])
-                    meta_salva_do_usuario = int(float(parts[5]))
-                    break
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        print(f"Erro ao ler dados do usuário para inicialização diária: {e}")
-
+    with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
+        for line in f:
+            parts = line.strip().split(';')
+            if len(parts) >= 6 and parts[0] == usuario:
+                #salva os valores e carrega as figurinhas
+                colecao_figurinhas.clear()
+                colecao_figurinhas.extend(parts[1].split(',') if parts[1] else [])
+                dias_consecutivos = int(parts[2])
+                ultimo_uso_str = parts[3]
+                progresso_do_dia_carregado = float(parts[4])
+                meta_salva_do_usuario = int(float(parts[5]))
+                break
+   
+#verifica a data
     hoje = datetime.now().date()
 
     if ultimo_uso_str:
@@ -233,8 +224,12 @@ def inicializar_estado_diario():
     else:
         ultimo_uso_data = None
 
+#decide se zera ou mantem o progresso
     copo_canvas_progresso_para_hoje = 0.0
 
+
+#se nao for o mesmo dia do uso verifica se bateu a meta aumenta quantidade de dias e desbloqueia figurinha
+#se não bateu a meta ele zera os dados da meta diaria 
     if ultimo_uso_data != hoje:
         if ultimo_uso_data and progresso_do_dia_carregado >= meta_salva_do_usuario and meta_salva_do_usuario > 0:
             dias_consecutivos += 1
@@ -256,6 +251,7 @@ def inicializar_estado_diario():
         "meta_diaria_ml": meta_diaria_ml
     }
 
+#ler todos os dados do arquivo novamente e salva no arquivo
     all_users_data_for_save = {}
     try:
         with open(ARQUIVO_DADOS_USUARIO, 'r') as f:
@@ -294,7 +290,7 @@ def cadastro():
     button_log.place_forget()
     fundo_label.configure(image=img_ctk2)
 
-    titulo2 = ctk.CTkLabel(janela, text="olá, eu me chamo alfredo, vou ser seu assistente para lhe lembrar de beber água",
+    titulo2 = ctk.CTkLabel(janela, text="Olá, eu me chamo Gotanildo, vou ser seu assistente para lhe lembrar de beber água",
                            font=ctk.CTkFont(size=20, weight="bold"), fg_color='#f3f3f3')
     titulo2.place(relx=0.52, rely=0.1, anchor="center")
 
@@ -312,7 +308,7 @@ def cadastro():
                             width=115, height=70, command=confirmar_cadastro, fg_color='#4682B4', corner_radius=50)
     button2.place(relx=0.52, rely=0.70, anchor="center")
 
-
+#cadastra o usuario e após cadastrar se for sucesso retorna a tela inicial para realizar login
 def confirmar_cadastro():
     global nome, senha, titulo2, button2
 
@@ -363,6 +359,8 @@ def login():
                                 width=115, height=70, command=validacao, fg_color='#4682B4', corner_radius=50)
     button_log2.place(relx=0.52, rely=0.70, anchor="center")
 
+
+#coleta os dados de hidrtação do usuario
 def tela_configuracoes():
     global litros, intervalo, horario_ini, horario_fin, button3, texto
 
@@ -393,7 +391,7 @@ def tela_configuracoes():
 
 
 
-
+#valida os dados do login e chama a função de configurações
 def validacao():
     global erro_login, usuario
 
@@ -431,6 +429,7 @@ def validacao():
         janela.after(1500, imagem_erro.destroy)
 
 
+#tela principal do app onde tem o copo a ser preeenchido com a meta diaria as figurinhas e o ranking
 def tela_principal():
     global litros, intervalo, horario_ini, horario_fin, button3, texto
     global copo_canvas, botao_beber, progresso_texto
@@ -443,7 +442,7 @@ def tela_principal():
 
     texto = ctk.CTkLabel(janela, text=f"Olá {usuario}, acompanhe sua hidratação diária!", font=ctk.CTkFont(size=24, weight="bold"))
     texto.place(relx=0.5, rely=0.1, anchor="center")
-
+#cria o copo para ser preenchido 
     copo_canvas = ctk.CTkCanvas(janela, width=200, height=400, bg="#f3f3f3", highlightthickness=0)
     copo_canvas.place(relx=0.5, rely=0.55, anchor="center")
 
@@ -457,7 +456,7 @@ def tela_principal():
         if meta_diaria_ml == 0:
             meta_diaria_ml = 2000
 
-
+#conforme o usuario marca que bebeu o copo vai enchendo
     def atualizar_copo():
         copo_canvas.delete("agua")
 
@@ -470,11 +469,14 @@ def tela_principal():
 
         progresso_texto.configure(text=f"{copo_canvas.progresso:.0f} ml / {meta_diaria_ml} ml")
 
+
+#quando atinge a meta recebe uma mensagem de conclusão da meta
         if copo_canvas.progresso >= meta_diaria_ml:
             progresso_texto.configure(text_color="green", text=f"Meta diária atingida! Parabéns!")
         else:
             progresso_texto.configure(text_color="black")
 
+#vai atualizando o nivel de agua no copo
     def beber_agua():
         copo_canvas.progresso += (qtd_por_lembrete*1000)
         if copo_canvas.progresso > meta_diaria_ml:
@@ -488,6 +490,7 @@ def tela_principal():
     progresso_texto = ctk.CTkLabel(janela, text=f"{copo_canvas.progresso:.0f} ml / {meta_diaria_ml} ml", font=ctk.CTkFont(size=16))
     progresso_texto.place(relx=0.5, rely=0.8, anchor="center")
 
+#cria os 2 botoẽs para ranking e figurinhas
     button_ranking = ctk.CTkButton(janela, text="Ver Ranking", command=mostrar_ranking, width=120, height=40)
     button_ranking.place(relx=0.1, rely=0.9, anchor="center")
 
@@ -496,7 +499,7 @@ def tela_principal():
 
     atualizar_copo()
 
-
+#validar os dados de hidrtação, calcular horario dos lembretes e salvar além de iniciar os lembretes
 def button3_acao():
     global erro, qtd_lembretes, qtd_por_lembrete, meta_diaria_ml
 
@@ -518,6 +521,7 @@ def button3_acao():
     else:
         l, i, ini, fim = resultado
 
+#calcula a quantidade de lembretes 
         qtd_lembretes, qtd_por_lembrete = calcular_lembretes(l, i, ini, fim)
 
         intervalo_int = int(intervalo.get())
@@ -545,7 +549,7 @@ def button3_acao():
 
 def mostrar_ranking():
     carregar_ranking()
-
+#cria a nova janela 
     janela_ranking = ctk.CTkToplevel(janela)
     janela_ranking.title("Ranking Semanal de Hidratação")
     janela_ranking.geometry("400x400")
@@ -554,10 +558,12 @@ def mostrar_ranking():
     janela_ranking.grab_set()
 
     ctk.CTkLabel(janela_ranking, text="Ranking Semanal", font=ctk.CTkFont(size=20, weight="bold")).pack(pady=10)
-
+#prepara os dados para serem mostrados 
     ranking_para_exibir = {k: v for k, v in ranking_semanal.items() if k != "ultima_reset_semana"}
     ranking_ordenado = sorted(ranking_para_exibir.items(), key=lambda item: item[1], reverse=True)
 
+
+#se nao tiver dados mostra essa mensagem se tiver mostra um por um 
     if not ranking_ordenado:
         ctk.CTkLabel(janela_ranking, text="Nenhum dado no ranking ainda.", font=ctk.CTkFont(size=14)).pack(pady=5)
     else:
@@ -570,6 +576,7 @@ def mostrar_ranking():
 def mostrar_colecao_figurinhas():
     carregar_dados_usuario()
 
+#cria uma nova janela 
     janela_figurinhas = ctk.CTkToplevel(janela)
     janela_figurinhas.title("Minhas Figurinhas")
     janela_figurinhas.geometry("600x600")
@@ -579,51 +586,45 @@ def mostrar_colecao_figurinhas():
 
     ctk.CTkLabel(janela_figurinhas, text="Sua Coleção de Figurinhas", font=ctk.CTkFont(size=20, weight="bold")).pack(pady=10)
 
+#area de rolagem de figurinhas para figurinrea de rolagem de fhas futuras
     frame_figurinhas = ctk.CTkScrollableFrame(janela_figurinhas, width=550, height=450)
     frame_figurinhas.pack(pady=10, padx=10, fill="both", expand=True)
 
+#se não desbloqueou ele mostra essa mensagem
     if not colecao_figurinhas:
         ctk.CTkLabel(frame_figurinhas, text="Você ainda não desbloqueou nenhuma figurinha. Continue se hidratando!", font=ctk.CTkFont(size=14)).pack(pady=10)
-    
+
+
+#analisa todas as figurinhas possiveis e tenta carregar as imagens 
     col = 0
     row = 0
     for i, figurinha_path in enumerate(todas_figurinhas):
-        try:
-            img_figurinha_preview = Image.open(figurinha_path)
-            img_ctk_figurinha_preview = CTkImage(light_image=img_figurinha_preview, dark_image=img_figurinha_preview, size=(100, 100))
+        img_figurinha_preview = Image.open(figurinha_path)
+        img_ctk_figurinha_preview = CTkImage(light_image=img_figurinha_preview, dark_image=img_figurinha_preview, size=(100, 100))
 
-            if figurinha_path in colecao_figurinhas:
-                label_status = "Desbloqueada"
-                text_color = "green"
-            else:
-                label_status = "Bloqueada"
-                text_color = "red"
 
-            frame_item = ctk.CTkFrame(frame_figurinhas)
-            frame_item.grid(row=row, column=col, padx=10, pady=10)
+#se usuario desbloqueou mostra texto debloqueada se não mostra bloqueada
+        if figurinha_path in colecao_figurinhas:
+            label_status = "Desbloqueada"
+            text_color = "green"
+        else:
+            label_status = "Bloqueada"
+            text_color = "red"
 
-            label_img = ctk.CTkLabel(frame_item, image=img_ctk_figurinha_preview, text="")
-            label_img.image = img_ctk_figurinha_preview
-            label_img.pack()
+        frame_item = ctk.CTkFrame(frame_figurinhas)
+        frame_item.grid(row=row, column=col, padx=10, pady=10)
+
+        label_img = ctk.CTkLabel(frame_item, image=img_ctk_figurinha_preview, text="")
+        label_img.image = img_ctk_figurinha_preview
+        label_img.pack()
             
-            ctk.CTkLabel(frame_item, text=f"Figurinha {i+1}", font=ctk.CTkFont(size=12)).pack()
-            ctk.CTkLabel(frame_item, text=label_status, text_color=text_color, font=ctk.CTkFont(size=12, weight="bold")).pack()
+        ctk.CTkLabel(frame_item, text=f"Figurinha {i+1}", font=ctk.CTkFont(size=12)).pack()
+        ctk.CTkLabel(frame_item, text=label_status, text_color=text_color, font=ctk.CTkFont(size=12, weight="bold")).pack()
 
-            col += 1
-            if col > 3:
-                col = 0
-                row += 1
-        except Exception:
-            # Exibe um placeholder genérico se a imagem não puder ser carregada
-            frame_item = ctk.CTkFrame(frame_figurinhas)
-            frame_item.grid(row=row, column=col, padx=10, pady=10)
-            ctk.CTkLabel(frame_item, text="[IMG ERRO]", font=ctk.CTkFont(size=10), text_color="red").pack()
-            ctk.CTkLabel(frame_item, text=f"Figurinha {i+1}", font=ctk.CTkFont(size=12)).pack()
-            ctk.CTkLabel(frame_item, text="Erro", text_color="red", font=ctk.CTkFont(size=12, weight="bold")).pack()
-            col += 1
-            if col > 3:
-                col = 0
-                row += 1
+        col += 1
+        if col > 3:
+            col = 0
+            row += 1
 
     ctk.CTkButton(janela_figurinhas, text="Fechar", command=janela_figurinhas.destroy).pack(pady=20)
 

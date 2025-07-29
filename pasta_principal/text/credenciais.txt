@@ -1,3 +1,0 @@
-Usuario: edu
-Senha: 123
----
