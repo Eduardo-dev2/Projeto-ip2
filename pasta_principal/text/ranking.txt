@@ -1,2 +1,3 @@
 ultima_reset_semana:2025-07-28
-edu;1
+edu;2
+lula;1
